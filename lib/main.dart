@@ -1,6 +1,19 @@
 import 'package:flutter/material.dart';
 import 'homepage.dart';
+import 'models/db_connect.dart';
+
 void main() {
+  var db = DbConnect();
+  // db.addQuest(Kuis(id: '10', title: 'What is Planet of Love ?', options: {
+  //   'Mercury' : false,
+  //   'Venus' : true,
+  //   'Jupiter' : false,
+  //   'Earth' : false
+  // }));
+
+  db.fetchQuest();
+
+
   runApp(const MyApp());
 }
 

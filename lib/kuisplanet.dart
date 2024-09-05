@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'homepage.dart';
+import 'package:planetaria/models/modelquest.dart';
 import 'constants.dart';
-import 'models/modelquest.dart';
 import 'widget/widgetquest.dart';
 import 'widget/nextbtn.dart';
 import 'widget/optcard.dart';
 import 'widget/result.dart';
+import 'models/db_connect.dart';
 
 class KuisPlanet extends StatefulWidget {
   const KuisPlanet({super.key});
@@ -14,33 +16,45 @@ class KuisPlanet extends StatefulWidget {
 }
 
 class _KuisPlanetState extends State<KuisPlanet> {
-  final List<Kuis> _kuis = [
-    Kuis(
-      id: '1',
-      title: 'Planet terbesar?',
-      options: {'Jupiter': true, 'Saturnus': false, 'Venus': false, 'Mars': false},
-    ),
-    Kuis(
-      id: '2',
-      title: 'Planet terpanas?',
-      options: {'Mars': false, 'Bumi': false, 'Venus': true, 'Merkurius': false},
-    ),
-  ];
+  var db = DbConnect(); 
+
+  late Future<List<Kuis>> _kuis; 
+
+  Future<List<Kuis>> getData() async {
+    return db.fetchQuest();
+  }
+
+  @override
+  void initState() {
+    _kuis = getData(); 
+    super.initState();
+  }
 
   int index = 0;
   int score = 0;
   bool isPressed = false;
   bool isAlreadyselected = false;
 
-  void nextQuest() {
-    if (index == _kuis.length - 1) {
-      showDialog(context: context, 
-      barrierDismissible: false,
-      builder: (ctx) => ResultBox(
-        result: score,
-        questlength: _kuis.length,
-        onPressed: startOver,
-      ));
+  void nextQuest(int kuisLength) {
+    if (index == kuisLength - 1) {
+      showDialog(
+        context: context, 
+        barrierDismissible: false,
+        builder: (ctx) => ResultBox(
+          result: score,
+          questlength: kuisLength,
+          onPressedRestart: startOver,
+          onPressedBack: () {  
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomePage(title: 'Planetaria Homepage'), 
+              ),
+              (route) => false, 
+            );
+          }
+        )
+      );
     } else {
       if (isPressed) {
         setState(() {
@@ -50,7 +64,7 @@ class _KuisPlanetState extends State<KuisPlanet> {
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Mohon untuk menjawab pertanyaanya'),
+          content: Text('Mohon untuk menjawab pertanyaannya'),
           behavior: SnackBarBehavior.floating,
           margin: EdgeInsets.symmetric(vertical: 20.0),
         ));
@@ -82,58 +96,83 @@ class _KuisPlanetState extends State<KuisPlanet> {
     Navigator.pop(context);
   }
 
+
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: background,
-      appBar: AppBar(
-        title: const Text('Kuis Planet'),
-        backgroundColor: background,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Text(
-              'Score : $score',
-              style: const TextStyle(fontSize: 10.0),
-            ),
-          ),
-        ],
-      ),
-      body: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: Column(
-          children: [
-            WidgetQuest(
-              indexAction: index,
-              quest: _kuis[index].title,
-              totalQuest: _kuis.length,
-            ),
-            const Divider(color: netral),
-            const SizedBox(height: 25.0),
-            for (int i = 0; i < _kuis[index].options.length; i++)
-              GestureDetector(
-                onTap: () => checkAnswerandUpdate(
-                    _kuis[index].options.values.toList()[i]),
-                child: OptionCard(
-                  option: _kuis[index].options.keys.toList()[i],
-                  color: isPressed
-                      ? _kuis[index].options.values.toList()[i] == true
-                          ? correct
-                          : incorrect
-                      : netral,
+    return FutureBuilder(
+      future: _kuis,
+      builder: (ctx, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasError) {
+            return Center(child: Text('${snapshot.error}'));
+          } else if (snapshot.hasData) {
+            var extractedData = snapshot.data as List<Kuis>;
+            return Scaffold(
+              backgroundColor: background,
+              appBar: AppBar(
+                title: const Text('Kuis Planet'),
+                backgroundColor: background,
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Text(
+                      'Score : $score',
+                      style: const TextStyle(
+                        fontSize: 20.0,
+                        color:Colors.white,
+                        ),
+                    ),
+                  ),
+                ],
+              ),
+              body: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Column(
+                  children: [
+                    WidgetQuest(
+                      indexAction: index,
+                      quest: extractedData[index].title,
+                      totalQuest: extractedData.length,
+                    ),
+                    const Divider(color: netral),
+                    const SizedBox(height: 25.0),
+                    for (int i = 0; i < extractedData[index].options.length; i++)
+                      GestureDetector(
+                        onTap: () => checkAnswerandUpdate(
+                            extractedData[index].options.values.toList()[i]),
+                        child: OptionCard(
+                          option: extractedData[index].options.keys.toList()[i],
+                          color: isPressed
+                              ? extractedData[index].options.values.toList()[i] == true
+                                  ? correct
+                                  : incorrect
+                              : netral,
+                        ),
+                      ),
+                  ],
                 ),
               ),
-          ],
-        ),
-      ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-        child: NextButton(
-          nextQuest: nextQuest,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+              floatingActionButton: GestureDetector(
+                onTap: () => nextQuest(extractedData.length),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: NextButton(),
+                ),
+              ),
+              floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+            );
+          }
+        } else {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        return const Center(
+          child: Text('No Data'),
+        );
+      },
     );
   }
 }
