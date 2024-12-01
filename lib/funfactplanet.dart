@@ -1,26 +1,19 @@
 import 'package:flutter/material.dart';
-import 'funfact/merkurius.dart';
-import 'funfact/venus.dart';
-import 'funfact/bumi.dart';
-import 'funfact/mars.dart';
-import 'funfact/jupiter.dart';
-import 'funfact/saturnus.dart';
-import 'funfact/uranus.dart';
-import 'funfact/neptunus.dart';
 import 'constants.dart';
+import 'funfact/funfact_planet.dart';
 
 class FunFactPlanet extends StatelessWidget {
   const FunFactPlanet({super.key});
 
   final List<Map<String, dynamic>> planets = const [
-    {'title': 'MERKURIUS', 'page': FunFactMerkurius(), 'color': mercurycolor},
-    {'title': 'VENUS', 'page': FunFactVenus(), 'color': venuscolor},
-    {'title': 'BUMI', 'page': FunFactBumi(), 'color': earthcolor},
-    {'title': 'MARS', 'page': FunFactMars(), 'color': marscolor},
-    {'title': 'JUPITER', 'page': FunFactJupiter(), 'color': jupitercolor},
-    {'title': 'SATURNUS', 'page': FunFactSaturnus(), 'color': saturncolor},
-    {'title': 'URANUS', 'page': FunFactUranus(), 'color': uranuscolor},
-    {'title': 'NEPTUNUS', 'page': FunFactNeptunus(), 'color': neptunecolor},
+    {'title': 'MERKURIUS', 'color': mercurycolor},
+    {'title': 'VENUS', 'color': venuscolor},
+    {'title': 'BUMI', 'color': earthcolor},
+    {'title': 'MARS', 'color': marscolor},
+    {'title': 'JUPITER', 'color': jupitercolor},
+    {'title': 'SATURNUS', 'color': saturncolor},
+    {'title': 'URANUS', 'color': uranuscolor},
+    {'title': 'NEPTUNUS', 'color': neptunecolor},
   ];
 
   @override
@@ -41,7 +34,6 @@ class FunFactPlanet extends StatelessWidget {
                 return _buildPlanetCard(
                   context,
                   planets[index]['title'],
-                  planets[index]['page'],
                   planets[index]['color'],
                 );
               },
@@ -62,22 +54,24 @@ class FunFactPlanet extends StatelessWidget {
     );
   }
 
-  Widget _buildPlanetCard(BuildContext context, String title, Widget page, Color backgroundColor) {
+  Widget _buildPlanetCard(BuildContext context, String title, Color backgroundColor) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => page),
+          MaterialPageRoute(
+            builder: (context) => FunFactPage(planetName: title.toLowerCase(), planetColor: backgroundColor,),
+          ),
         );
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 40.0),
         child: Container(
-          height: 60, 
-          margin: const EdgeInsets.symmetric(vertical: 10.0), 
+          height: 60,
+          margin: const EdgeInsets.symmetric(vertical: 10.0),
           decoration: BoxDecoration(
             color: backgroundColor,
-            borderRadius: BorderRadius.circular(12.0), 
+            borderRadius: BorderRadius.circular(12.0),
           ),
           child: Center(
             child: Text(

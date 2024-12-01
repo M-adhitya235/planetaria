@@ -3,20 +3,23 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '/constants.dart';
 
-class FunFactBumi extends StatefulWidget {
-  const FunFactBumi({super.key});
+class FunFactPage extends StatefulWidget {
+  final String planetName;
+  final Color planetColor;
+
+  const FunFactPage({super.key, required this.planetName, required this.planetColor});
 
   @override
-  State<FunFactBumi> createState() => _FunFactBumiState();
+  State<FunFactPage> createState() => _FunFactPageState();
 }
 
-class _FunFactBumiState extends State<FunFactBumi> {
+class _FunFactPageState extends State<FunFactPage> {
   late Future<List<String>> funFacts;
 
   
-  Future<List<String>> fetchFunFacts() async {
+  Future<List<String>> fetchFunFacts(String planetName) async {
     final url = Uri.parse(
-        'https://planetaria-fbdbf-default-rtdb.asia-southeast1.firebasedatabase.app/funfact/-OC9kPjzq4757N-L6jUg/Bumi.json');
+        'https://planetaria-fbdbf-default-rtdb.asia-southeast1.firebasedatabase.app/funfact/-OCJHobgMTYOAUkKzwLC/$planetName.json');
 
     final response = await http.get(url);
 
@@ -31,7 +34,7 @@ class _FunFactBumiState extends State<FunFactBumi> {
   @override
   void initState() {
     super.initState();
-    funFacts = fetchFunFacts();
+    funFacts = fetchFunFacts(widget.planetName);
   }
 
   @override
@@ -41,11 +44,21 @@ class _FunFactBumiState extends State<FunFactBumi> {
         future: funFacts,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator()); 
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+              child: Text(
+                'Error: ${snapshot.error}',
+                style: const TextStyle(color: Colors.red),
+              ),
+            );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No fun facts available'));
+            return const Center(
+              child: Text(
+                'No fun facts available',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            );
           }
 
           final facts = snapshot.data!;
@@ -78,10 +91,10 @@ class _FunFactBumiState extends State<FunFactBumi> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const SizedBox(height: 15),
-                        const Text(
-                          'FAKTA - FAKTA\nPLANET BUMI',
+                        Text(
+                          'FAKTA - FAKTA\nPLANET ${widget.planetName.toUpperCase()}',
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontFamily: 'Ruluko',
                             fontSize: 25,
                           ),
@@ -91,7 +104,7 @@ class _FunFactBumiState extends State<FunFactBumi> {
                           child: Container(
                             padding: const EdgeInsets.all(8.0),
                             decoration: BoxDecoration(
-                              color: earthcolor,
+                              color: widget.planetColor, // Warna bisa diatur per planet
                               borderRadius: BorderRadius.circular(15),
                             ),
                             child: Center(
@@ -101,8 +114,8 @@ class _FunFactBumiState extends State<FunFactBumi> {
                                 style: const TextStyle(
                                   fontSize: 24,
                                   fontFamily: 'Ruluko',
-                                  color: Color.fromARGB(255, 228, 226, 211),
-                                ),
+                                  color: Color.fromARGB(255, 255, 255, 255)                             
+                                  ),
                               ),
                             ),
                           ),

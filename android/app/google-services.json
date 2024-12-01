@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "815439497415",
+    "firebase_url": "https://planetaria-fbdbf-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "planetaria-fbdbf",
+    "storage_bucket": "planetaria-fbdbf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:815439497415:android:6740e9db39154fa2a1d6e2",
+        "android_client_info": {
+          "package_name": "com.planetaria.itk"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB3yrmJUY0cSVpfFMX0xBgZmWWbLU8Srus"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
